@@ -1,53 +1,31 @@
-# 노션 기반 견적서 웹 조회 및 PDF 다운로드 서비스 MVP PRD
+# Notion CMS 개인 블로그 MVP PRD
 
 ## 핵심 정보
 
-**목적**: 노션에서 작성한 견적서를 클라이언트가 별도 앱 없이 웹 브라우저에서 즉시 확인하고 PDF로 저장할 수 있게 한다
-**사용자**: 견적서를 받는 클라이언트(외부), 견적서를 노션에서 작성하고 링크를 공유하는 관리자(내부)
+**목적**: Notion을 CMS로 활용하여 별도 백엔드 없이 개인 블로그를 운영할 수 있는 정적/동적 하이브리드 웹사이트 구현
+**사용자**: Notion으로 콘텐츠를 작성하고 싶은 1인 개발자 및 기술 블로거
 
 ---
 
 ## 사용자 여정
 
-### 클라이언트 여정
-
 ```
-1. [견적서 접근]
-   관리자가 공유한 고유 링크(토큰 포함) 수신
-   ↓ 링크 클릭
+1. [블로그 홈 페이지] - 최신 포스트 목록 표시
+   ↓ 태그/카테고리 클릭
 
-2. [견적서 조회 페이지]
-   토큰 유효성 서버 검증
-   ↓
-   [유효] → 견적서 내용 렌더링
-   [만료/불일치] → 접근 불가 안내 페이지로 이동
+2. [태그/카테고리 필터 페이지] - 해당 태그의 포스트만 필터링
+   ↓ 포스트 카드 클릭
+
+   [포스트 카드 클릭] → [블로그 포스트 상세 페이지] → [관련 포스트 탐색]
+   [홈으로 버튼] → [블로그 홈 페이지]
    ↓
 
-3. [견적서 확인]
-   견적 항목, 금액, 발행일 등 확인
-   ↓ PDF 다운로드 버튼 클릭
+3. [블로그 포스트 상세 페이지] - Notion 블록을 렌더링하여 본문 표시
+   ↓ 읽기 완료 후
 
-4. [완료] → PDF 파일 로컬 저장
-```
-
-### 관리자 여정
-
-```
-1. [관리자 로그인 페이지]
-   이메일 + 비밀번호 입력
-   ↓ 로그인 성공
-
-2. [관리자 대시보드]
-   연동된 노션 DB의 견적서 목록 조회
-   ↓ 견적서 선택
-
-3. [견적서 상세 관리 페이지]
-   견적서 미리보기 확인
-   ↓ 공유 링크 생성 버튼 클릭
-
-4. [공유 링크 생성]
-   고유 토큰 발급 및 링크 클립보드 복사
-   ↓ 클라이언트에게 전달
+4. [목차 내비게이션] → [다른 섹션으로 이동]
+   [관련 포스트] → [다른 포스트 상세 페이지]
+   [태그 클릭] → [태그 필터 페이지]
 ```
 
 ---
@@ -57,258 +35,521 @@
 ### 1. MVP 핵심 기능
 
 | ID | 기능명 | 설명 | MVP 필수 이유 | 관련 페이지 |
-|----|--------|------|---------------|-------------|
-| **F001** | 노션 견적서 데이터 조회 | Notion API를 호출해 특정 페이지(견적서)의 블록 데이터를 구조화된 형태로 가져옴 | 서비스의 유일한 데이터 소스 | 견적서 조회 페이지, 견적서 상세 관리 페이지 |
-| **F002** | 견적서 웹 렌더링 | 노션 블록 데이터를 파싱해 견적서 형식(헤더, 항목 테이블, 합계, 비고)으로 화면에 표시 | 클라이언트가 내용을 확인하는 핵심 기능 | 견적서 조회 페이지 |
-| **F003** | PDF 생성 및 다운로드 | 렌더링된 견적서 HTML을 PDF로 변환해 파일 다운로드 제공 | 클라이언트의 최종 목적(문서 보관) | 견적서 조회 페이지 |
-| **F004** | 공유 링크 생성 | 견적서별 고유 토큰을 발급하고 접근 가능한 URL을 생성 | 클라이언트 접근을 견적서 단위로 제어 | 견적서 상세 관리 페이지 |
-| **F005** | 견적서 목록 조회 | 노션 DB에서 모든 견적서 페이지를 목록으로 조회(제목, 상태, 발행일) | 관리자가 공유할 견적서를 선택하는 진입점 | 관리자 대시보드 |
+|----|--------|------|-------------|------------|
+| **F001** | Notion DB 포스트 목록 조회 | Notion Database API로 Published 상태의 포스트 목록 가져오기, ISR 적용 | 블로그의 핵심 콘텐츠 피드 | 블로그 홈 페이지, 태그 필터 페이지 |
+| **F002** | Notion 블록 렌더링 | Notion blocks API로 포스트 본문을 HTML로 변환하여 표시 (paragraph, heading, code, image, callout, quote, list 등) | 포스트 본문 표시의 핵심 | 블로그 포스트 상세 페이지 |
+| **F003** | 태그/카테고리 필터링 | Notion Database의 Multi-select 속성을 기반으로 포스트 필터링 | 콘텐츠 탐색 핵심 기능 | 블로그 홈 페이지, 태그 필터 페이지 |
+| **F004** | 포스트 상세 페이지 | 포스트 제목, 커버 이미지, 작성일, 태그, 본문 렌더링 | 블로그 핵심 콘텐츠 표시 | 블로그 포스트 상세 페이지 |
+| **F005** | 포스트 목차(TOC) 자동 생성 | H1, H2, H3 블록을 파싱하여 클릭 가능한 목차 생성 | 긴 포스트 탐색 편의성 | 블로그 포스트 상세 페이지 |
+| **F006** | SEO 메타태그 최적화 | 각 페이지별 title, description, Open Graph, Twitter Card 메타태그 자동 생성 | 검색엔진 노출 필수 | 블로그 홈 페이지, 블로그 포스트 상세 페이지, 태그 필터 페이지 |
+| **F007** | sitemap.xml 자동 생성 | Notion DB의 포스트 목록 기반 sitemap 동적 생성 | 검색엔진 크롤링 지원 | sitemap 페이지 (자동) |
+| **F008** | 다크모드 지원 | next-themes 기반 라이트/다크 테마 토글 | 사용자 경험 기본 요소 | 전체 페이지 (공통 헤더) |
 
 ### 2. MVP 필수 지원 기능
 
 | ID | 기능명 | 설명 | MVP 필수 이유 | 관련 페이지 |
-|----|--------|------|---------------|-------------|
-| **F010** | 관리자 인증 | 이메일/비밀번호 로그인, 로그아웃, 세션 유지 | 관리자 기능과 클라이언트 기능을 분리 | 관리자 로그인 페이지 |
-| **F011** | 토큰 기반 접근 제어 | 공유 링크의 토큰 유효성 검증, 만료 처리 | 견적서를 인가된 클라이언트에게만 노출 | 견적서 조회 페이지 |
+|----|--------|------|-------------|------------|
+| **F009** | ISR 캐시 전략 | revalidate 설정으로 Notion API 호출 최소화, 포스트별 캐시 태그 관리 | Notion API 요청 제한 대응, 빠른 페이지 로딩 | 블로그 홈 페이지, 블로그 포스트 상세 페이지, 태그 필터 페이지 |
+| **F010** | 포스트 검색 | 포스트 제목 기반 클라이언트 사이드 검색 | 포스트 수 증가에 따른 탐색 지원 | 블로그 홈 페이지 |
+| **F011** | robots.txt 생성 | 검색엔진 크롤러 접근 제어 파일 자동 생성 | SEO 기본 설정 | robots 페이지 (자동) |
+| **F012** | 읽기 예상 시간 표시 | 본문 텍스트 분량 기반 읽기 소요 시간 계산 표시 | 독자 경험 향상 | 블로그 홈 페이지, 블로그 포스트 상세 페이지 |
+| **F013** | 반응형 레이아웃 | 모바일/태블릿/데스크탑 대응 레이아웃 | 다양한 기기 지원 필수 | 전체 페이지 (공통) |
 
 ### 3. MVP 이후 기능 (제외)
 
-- 전자서명 및 수락 기능
-- 견적서 상태 변경 알림 (이메일, 슬랙 등)
-- 다국어 지원 (한국어 외)
-- 결제 연동
-- 커스텀 디자인 템플릿
-- 견적서 댓글 및 협업 기능
-- 링크 비밀번호 추가 보호
-- 조회 통계 및 열람 이력
+- 댓글 시스템 (Giscus, Utterances 등)
+- 뉴스레터 구독 기능
+- 포스트 조회수 추적
+- RSS 피드
+- 다국어 지원 (i18n)
+- 포스트 시리즈 기능
 
 ---
 
 ## 메뉴 구조
 
 ```
-[비로그인 접근]
-├── 견적서 조회 페이지 (토큰 파라미터 필수)
-│   └── 기능: F001, F002, F003, F011 (노션 데이터 조회, 렌더링, PDF 다운로드, 토큰 검증)
-└── 접근 불가 안내 페이지
-    └── 기능: F011 (토큰 오류 안내)
+블로그 내비게이션
+├── 로고/블로그명 (홈으로 이동)
+│   └── 기능: F001 (포스트 목록 조회)
+├── 검색
+│   └── 기능: F010 (포스트 제목 검색)
+└── 테마 토글
+    └── 기능: F008 (다크모드 전환)
 
-[관리자 - 비로그인]
-└── 관리자 로그인 페이지
-    └── 기능: F010 (이메일/비밀번호 로그인)
+메인 콘텐츠 영역
+├── 블로그 홈 페이지
+│   └── 기능: F001, F003, F006, F010, F012, F013
+├── 태그 필터 페이지
+│   └── 기능: F001, F003, F006, F013
+└── 블로그 포스트 상세 페이지
+    └── 기능: F002, F004, F005, F006, F012, F013
 
-[관리자 - 로그인 후]
-├── 관리자 대시보드 (홈)
-│   └── 기능: F005 (견적서 목록 조회)
-├── 견적서 상세 관리 페이지
-│   └── 기능: F001, F004 (노션 데이터 조회, 공유 링크 생성)
-└── 로그아웃
-    └── 기능: F010 (세션 종료)
+자동 생성 페이지
+├── sitemap.xml
+│   └── 기능: F007
+└── robots.txt
+    └── 기능: F011
 ```
 
 ---
 
 ## 페이지별 상세 기능
 
-### 견적서 조회 페이지
+### 블로그 홈 페이지
 
-> **구현 기능:** `F001`, `F002`, `F003`, `F011` | **인증:** 토큰 검증 필수 (비로그인 공개 접근)
+> **구현 기능:** `F001`, `F003`, `F006`, `F010`, `F012`, `F013` | **렌더링:** ISR (revalidate: 3600)
 
 | 항목 | 내용 |
 |------|------|
-| **역할** | 클라이언트가 견적서 내용을 확인하고 PDF를 다운로드하는 서비스의 핵심 페이지 |
-| **진입 경로** | 관리자가 공유한 고유 토큰이 포함된 URL로 직접 접근 |
-| **사용자 행동** | 견적 항목 및 금액 확인 후 PDF 다운로드 버튼 클릭 |
-| **주요 기능** | - URL 쿼리 파라미터에서 토큰 추출 및 서버 측 유효성 검증 (F011)<br>- Notion API 호출로 견적서 블록 데이터 조회 (F001)<br>- 견적서 헤더(발행일, 수신자, 공급자), 항목 테이블(품목, 수량, 단가, 금액), 공급가액/부가세/합계, 비고 섹션 렌더링 (F002)<br>- jsPDF 또는 html-to-image 기반 PDF 생성 후 파일 다운로드 트리거 (F003)<br>- **PDF 다운로드** 버튼 |
-| **다음 이동** | 토큰 유효 → 견적서 렌더링, 토큰 무효/만료 → 접근 불가 안내 페이지로 리디렉션 |
+| **역할** | 블로그 랜딩 페이지. 모든 Published 포스트 목록을 카드 형태로 표시하고 태그 필터 및 검색 제공 |
+| **진입 경로** | 도메인 루트 접속, 헤더 로고 클릭, 브라우저 뒤로가기 |
+| **사용자 행동** | 포스트 카드 탐색, 태그 클릭으로 필터링, 검색어 입력, 포스트 클릭으로 상세 이동 |
+| **주요 기능** | - Notion DB에서 Published=true 포스트 목록 조회 (ISR)<br>- 포스트 카드: 제목, 커버 이미지, 작성일, 태그 배지, 요약, 읽기 예상 시간 표시<br>- 전체 태그 목록 사이드바 표시 (활성 태그 하이라이트)<br>- 포스트 제목 기반 클라이언트 검색 (Input 입력 시 실시간 필터)<br>- 페이지네이션 (포스트 9개 단위)<br>- **포스트 클릭** 시 상세 페이지 이동 |
+| **다음 이동** | 포스트 카드 클릭 → 블로그 포스트 상세 페이지, 태그 클릭 → 태그 필터 페이지 |
 
 ---
 
-### 접근 불가 안내 페이지
+### 태그 필터 페이지
 
-> **구현 기능:** `F011` | **인증:** 없음
+> **구현 기능:** `F001`, `F003`, `F006`, `F013` | **렌더링:** ISR (revalidate: 3600)
 
 | 항목 | 내용 |
 |------|------|
-| **역할** | 토큰이 유효하지 않거나 만료된 경우 클라이언트에게 명확한 안내를 제공하는 에러 페이지 |
-| **진입 경로** | 견적서 조회 페이지에서 토큰 검증 실패 시 자동 리디렉션 |
-| **사용자 행동** | 오류 메시지 확인 후 관리자에게 재공유 요청 |
-| **주요 기능** | - 오류 유형별 안내 메시지 표시 (토큰 없음 / 만료됨 / 존재하지 않음) (F011)<br>- 문의 안내 문구 표시 |
-| **다음 이동** | 종료 (외부 이동 없음) |
+| **역할** | 특정 태그 또는 카테고리에 해당하는 포스트만 필터링하여 표시 |
+| **진입 경로** | 블로그 홈 페이지의 태그 클릭, 포스트 상세 페이지의 태그 배지 클릭 |
+| **사용자 행동** | 해당 태그 포스트 목록 탐색, 포스트 클릭, 다른 태그 선택으로 전환 |
+| **주요 기능** | - Notion DB filter API로 특정 태그 포스트만 조회<br>- 현재 선택된 태그 이름 헤더에 표시<br>- 태그별 포스트 수 표시<br>- 포스트 카드 그리드 표시 (홈과 동일한 카드 컴포넌트 재사용)<br>- 사이드바에 전체 태그 목록 표시<br>- **포스트 카드 클릭** 시 상세 이동 |
+| **다음 이동** | 포스트 클릭 → 블로그 포스트 상세 페이지, 다른 태그 클릭 → 해당 태그 필터 페이지, 홈 로고 클릭 → 블로그 홈 페이지 |
 
 ---
 
-### 관리자 로그인 페이지
+### 블로그 포스트 상세 페이지
 
-> **구현 기능:** `F010` | **인증:** 없음 (로그인 전 접근)
+> **구현 기능:** `F002`, `F004`, `F005`, `F006`, `F012`, `F013` | **렌더링:** ISR (revalidate: 3600)
 
 | 항목 | 내용 |
 |------|------|
-| **역할** | 관리자 전용 영역의 진입을 위한 인증 페이지 |
-| **진입 경로** | 비로그인 상태로 관리자 대시보드 접근 시 자동 리디렉션, 또는 직접 URL 입력 |
-| **사용자 행동** | 이메일과 비밀번호 입력 후 로그인 버튼 클릭 |
-| **주요 기능** | - 이메일/비밀번호 입력 폼 (React Hook Form + Zod 검증) (F010)<br>- 로그인 실패 시 인라인 에러 메시지 표시 (F010)<br>- **로그인** 버튼 |
-| **다음 이동** | 로그인 성공 → 관리자 대시보드, 실패 → 에러 메시지 표시 후 현재 페이지 유지 |
+| **역할** | 단일 블로그 포스트의 전체 본문을 Notion 블록 기반으로 렌더링하여 표시 |
+| **진입 경로** | 블로그 홈 페이지 포스트 카드 클릭, 태그 필터 페이지 포스트 카드 클릭 |
+| **사용자 행동** | 본문 읽기, 목차로 섹션 이동, 코드 블록 복사, 태그 클릭으로 관련 포스트 탐색 |
+| **주요 기능** | - 포스트 커버 이미지, 제목, 작성일, 태그 배지, 읽기 예상 시간 헤더에 표시<br>- Notion blocks 렌더링: paragraph, heading_1/2/3, code(신택스 하이라이트), image, callout, quote, bulleted_list, numbered_list, toggle, divider, table<br>- 우측 사이드바 목차(TOC): H2/H3 기반 자동 생성, 현재 섹션 스크롤 하이라이트<br>- 코드 블록 언어 표시 + 복사 버튼<br>- 포스트 하단 태그 목록<br>- 이전/다음 포스트 내비게이션<br>- **태그 클릭** 시 태그 필터 페이지 이동 |
+| **다음 이동** | 태그 클릭 → 태그 필터 페이지, 이전/다음 포스트 → 해당 포스트 상세 페이지, 헤더 로고 → 블로그 홈 페이지 |
 
 ---
 
-### 관리자 대시보드
+### sitemap.xml 페이지 (자동)
 
-> **구현 기능:** `F005` | **인증:** 관리자 로그인 필수
+> **구현 기능:** `F007` | **렌더링:** 동적 생성
 
 | 항목 | 내용 |
 |------|------|
-| **역할** | 노션 DB의 전체 견적서 목록을 조회하고 관리할 견적서를 선택하는 홈 화면 |
-| **진입 경로** | 관리자 로그인 성공 후 자동 리디렉션, 또는 로그인 상태에서 직접 접근 |
-| **사용자 행동** | 견적서 목록에서 특정 견적서를 클릭해 상세 관리 페이지로 이동 |
-| **주요 기능** | - Notion API 호출로 견적서 DB 전체 목록 조회 (F005)<br>- 견적서 카드/행 목록 표시: 견적서 제목, 발행일, 클라이언트명, 공유 링크 생성 여부 (F005)<br>- 목록 항목 클릭 시 견적서 상세 관리 페이지로 이동<br>- 로그아웃 버튼 (F010) |
-| **다음 이동** | 항목 클릭 → 견적서 상세 관리 페이지 |
+| **역할** | 검색엔진 크롤러를 위한 사이트맵 자동 생성 |
+| **진입 경로** | 검색엔진 크롤러 자동 접근, 직접 URL 접속 |
+| **사용자 행동** | 검색엔진 자동 소비 (일반 사용자 직접 접근 없음) |
+| **주요 기능** | - Next.js MetadataRoute.Sitemap 활용<br>- Notion DB 전체 포스트 URL 포함<br>- 정적 페이지(홈, 태그별) URL 포함<br>- lastModified 날짜 포함 |
+| **다음 이동** | 없음 (검색엔진 소비용) |
 
 ---
 
-### 견적서 상세 관리 페이지
+## Notion Database 스키마 정의
 
-> **구현 기능:** `F001`, `F004` | **인증:** 관리자 로그인 필수
+Notion에서 아래 속성으로 블로그 Database를 생성해야 합니다.
 
-| 항목 | 내용 |
-|------|------|
-| **역할** | 특정 견적서의 내용을 미리 확인하고 클라이언트 공유를 위한 고유 링크를 생성하는 관리자 작업 페이지 |
-| **진입 경로** | 관리자 대시보드의 견적서 목록 항목 클릭 |
-| **사용자 행동** | 견적서 미리보기 확인 후 공유 링크 생성 버튼 클릭 및 링크 복사 |
-| **주요 기능** | - 선택한 노션 페이지 ID로 견적서 상세 데이터 조회 및 미리보기 표시 (F001)<br>- 고유 토큰 생성 및 공유 가능한 URL 조합 (F004)<br>- 생성된 링크 클립보드 복사 기능 (F004)<br>- 이전에 생성된 링크가 있으면 기존 링크 표시 (F004)<br>- **공유 링크 생성** 버튼, **링크 복사** 버튼 |
-| **다음 이동** | 링크 생성 완료 → 동일 페이지에서 링크 표시, 뒤로 가기 → 관리자 대시보드 |
+| 속성명 | Notion 타입 | 설명 |
+|--------|------------|------|
+| Title | Title | 포스트 제목 |
+| Slug | Rich Text | URL용 슬러그 (영문, 하이픈) |
+| Status | Select | 발행 상태 (Draft / Published) |
+| PublishedAt | Date | 발행일 |
+| Tags | Multi-select | 태그 목록 |
+| Category | Select | 카테고리 (선택적) |
+| Summary | Rich Text | 포스트 요약 (카드에 표시) |
+| Cover | Files & Media | 커버 이미지 |
 
 ---
 
 ## 데이터 모델
 
-### ShareToken (공유 토큰)
+### NotionPost (Notion DB 응답 매핑)
 
 | 필드 | 설명 | 타입/관계 |
 |------|------|----------|
-| id | 고유 식별자 | UUID |
-| token | 클라이언트 접근용 무작위 토큰 | string (unique) |
-| notion_page_id | 연결된 노션 견적서 페이지 ID | string |
-| created_by | 토큰을 생성한 관리자 | → Admin.id |
-| expires_at | 토큰 만료 일시 (null = 무기한) | timestamp or null |
-| created_at | 생성 일시 | timestamp |
+| id | Notion 페이지 ID | string (UUID) |
+| slug | URL 슬러그 | string |
+| title | 포스트 제목 | string |
+| summary | 포스트 요약 | string |
+| status | 발행 상태 | "Draft" \| "Published" |
+| publishedAt | 발행일 | Date \| null |
+| tags | 태그 목록 | string[] |
+| category | 카테고리 | string \| null |
+| coverImageUrl | 커버 이미지 URL | string \| null |
+| readingTime | 읽기 예상 시간(분) | number |
 
-### Admin (관리자)
+### NotionBlock (Notion blocks API 응답 매핑)
 
 | 필드 | 설명 | 타입/관계 |
 |------|------|----------|
-| id | 고유 식별자 | UUID |
-| email | 로그인 이메일 | string (unique) |
-| password_hash | 해시된 비밀번호 | string |
-| created_at | 계정 생성 일시 | timestamp |
+| id | 블록 ID | string (UUID) |
+| type | 블록 유형 | BlockType (paragraph \| heading_1 \| heading_2 \| heading_3 \| code \| image \| callout \| quote \| bulleted_list_item \| numbered_list_item \| toggle \| divider \| table) |
+| content | 블록 내용 | RichText[] |
+| children | 중첩 블록 | NotionBlock[] \| null |
+| language | 코드 언어 (code 블록) | string \| null |
+| url | 이미지 URL (image 블록) | string \| null |
 
-> **노션 데이터는 별도 DB에 저장하지 않음.** 견적서 내용은 요청 시마다 Notion API를 실시간 호출하여 조회한다.
+### TocItem (목차 아이템)
 
----
-
-## 기술 스택 (최신 버전)
-
-### 프론트엔드 프레임워크
-
-- **Next.js 15.5.3** (App Router + Turbopack) - React 풀스택 프레임워크, API Route로 서버 로직 처리
-- **TypeScript 5** - 타입 안전성 보장
-- **React 19.1.0** - UI 라이브러리
-
-### 스타일링 & UI
-
-- **TailwindCSS v4** (설정 파일 없는 새로운 CSS 엔진) - 유틸리티 CSS 프레임워크
-- **shadcn/ui** (new-york style) - 고품질 React 컴포넌트 라이브러리
-- **Lucide React** - 아이콘 라이브러리
-
-### 폼 & 검증
-
-- **React Hook Form 7.x** - 로그인 폼 상태 관리
-- **Zod** - 입력값 스키마 검증
-
-### PDF 생성
-
-- **@react-pdf/renderer** - React 컴포넌트 기반 PDF 생성 (서버 사이드 렌더링 지원, 레이아웃 정밀 제어 가능)
-- 대안: **jsPDF + html2canvas** (DOM 기반 캡처, 구현 빠름 / 한글 폰트 설정 필요)
-
-### 외부 API
-
-- **@notionhq/client** - Notion API 공식 SDK (페이지 블록 조회, DB 쿼리)
-
-### 백엔드 & 데이터베이스
-
-- **Next.js API Routes** (Route Handlers) - 서버 로직 처리 (토큰 검증, Notion API 프록시, 관리자 인증)
-- **Supabase** - PostgreSQL 기반 BaaS (ShareToken, Admin 테이블 저장, 세션 관리)
-
-### 인증
-
-- **Supabase Auth** - 관리자 이메일/비밀번호 인증, 세션 관리
-- Next.js Middleware - 관리자 페이지 접근 시 인증 상태 검증
-
-### 배포 & 호스팅
-
-- **Vercel** - Next.js 15 최적화 배포 플랫폼
-- **Vercel Environment Variables** - Notion API Key, Supabase URL/Key 등 시크릿 관리
-
-### 패키지 관리
-
-- **npm** - 의존성 관리
+| 필드 | 설명 | 타입/관계 |
+|------|------|----------|
+| id | 앵커 ID | string |
+| text | 헤딩 텍스트 | string |
+| level | 헤딩 레벨 | 1 \| 2 \| 3 |
+| children | 하위 목차 | TocItem[] |
 
 ---
 
-## 환경변수 목록
+## 프로젝트 파일 구조
 
-```env
-# Notion
-NOTION_API_KEY=           # Notion Integration 시크릿 키
-NOTION_DATABASE_ID=       # 견적서 목록이 저장된 노션 DB ID
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# 앱
-NEXT_PUBLIC_BASE_URL=     # 공유 링크 생성 시 사용하는 도메인 (예: https://invoice.example.com)
-TOKEN_EXPIRES_DAYS=       # 토큰 기본 만료 기간 (일 단위, 예: 30)
+```
+src/
+├── app/
+│   ├── layout.tsx                    # 루트 레이아웃 (ThemeProvider, 헤더, 푸터)
+│   ├── page.tsx                      # 블로그 홈 페이지 (F001, F003, F006, F010, F012, F013)
+│   ├── sitemap.ts                    # sitemap.xml 자동 생성 (F007)
+│   ├── robots.ts                     # robots.txt 자동 생성 (F011)
+│   └── posts/
+│       └── [slug]/
+│           ├── page.tsx              # 블로그 포스트 상세 페이지 (F002, F004, F005, F006, F012, F013)
+│           └── loading.tsx           # 스켈레톤 로딩 UI
+│   └── tags/
+│       └── [tag]/
+│           └── page.tsx              # 태그 필터 페이지 (F001, F003, F006, F013)
+│
+├── components/
+│   ├── layout/
+│   │   ├── header.tsx                # 헤더 (로고, 검색, 테마 토글)
+│   │   └── footer.tsx                # 푸터
+│   ├── blog/
+│   │   ├── post-card.tsx             # 포스트 카드 컴포넌트
+│   │   ├── post-grid.tsx             # 포스트 그리드 레이아웃
+│   │   ├── post-header.tsx           # 포스트 상세 헤더 (제목, 날짜, 태그)
+│   │   ├── post-body.tsx             # Notion 블록 렌더러
+│   │   ├── tag-badge.tsx             # 태그 배지 컴포넌트
+│   │   ├── tag-sidebar.tsx           # 태그 목록 사이드바
+│   │   ├── toc.tsx                   # 목차(TOC) 컴포넌트 (F005)
+│   │   ├── post-pagination.tsx       # 이전/다음 포스트 내비게이션
+│   │   └── reading-time.tsx          # 읽기 시간 표시 (F012)
+│   ├── notion/
+│   │   ├── notion-block.tsx          # 블록 타입별 렌더러 (F002)
+│   │   ├── notion-code.tsx           # 코드 블록 (신택스 하이라이트 + 복사)
+│   │   ├── notion-image.tsx          # 이미지 블록 (next/image 최적화)
+│   │   └── notion-callout.tsx        # 콜아웃 블록
+│   └── ui/                           # shadcn/ui 컴포넌트
+│
+└── lib/
+    ├── notion/
+    │   ├── client.ts                 # Notion Client 초기화
+    │   ├── posts.ts                  # 포스트 목록/상세 조회 함수 (F001, F004)
+    │   ├── blocks.ts                 # 블록 조회 및 변환 함수 (F002)
+    │   └── types.ts                  # Notion 관련 TypeScript 타입
+    ├── utils/
+    │   ├── reading-time.ts           # 읽기 시간 계산 (F012)
+    │   ├── toc.ts                    # 목차 생성 유틸 (F005)
+    │   └── slug.ts                   # 슬러그 처리 유틸
+    └── constants.ts                  # 환경변수, 상수 정의
 ```
 
 ---
 
-## 수락 기준 (Acceptance Criteria)
+## 기술 스택
 
-### F001 - 노션 견적서 데이터 조회
-- [ ] 유효한 노션 페이지 ID로 호출 시 2초 이내 응답한다
-- [ ] 노션 API 오류 시 사용자에게 오류 메시지를 표시하고 빈 화면이 되지 않는다
-- [ ] 견적서 제목, 항목 테이블, 합계 금액 데이터를 구조화된 객체로 파싱한다
+### 프론트엔드 프레임워크
 
-### F002 - 견적서 웹 렌더링
-- [ ] 견적서 항목 테이블(품목, 수량, 단가, 공급가액)이 정렬된 형태로 표시된다
-- [ ] 공급가액, 부가세(10%), 합계 금액이 자동 계산되어 표시된다
-- [ ] 모바일 화면(375px 이상)에서 가로 스크롤 없이 읽기 가능하다
+- **Next.js 15.5.3** (App Router + Turbopack) - ISR, SSG, 동적 라우팅
+- **TypeScript 5** - 타입 안전성 (Notion API 응답 타입 정의)
+- **React 19.1.0** - Server Components 우선 설계
 
-### F003 - PDF 생성 및 다운로드
-- [ ] PDF 다운로드 버튼 클릭 시 3초 이내 다운로드가 시작된다
-- [ ] 생성된 PDF에 견적서 모든 섹션(헤더, 항목, 합계, 비고)이 포함된다
-- [ ] 한글 텍스트가 깨지지 않고 정상 출력된다
-- [ ] 파일명은 `견적서_[견적서제목]_[발행일].pdf` 형식이다
+### 스타일링 & UI
 
-### F004 - 공유 링크 생성
-- [ ] 동일 견적서에 대해 링크 생성을 반복해도 기존 토큰을 재사용(또는 갱신)한다
-- [ ] 생성된 링크를 클립보드에 복사할 수 있다
-- [ ] 링크에는 추측 불가능한 토큰(UUID v4 이상 수준의 엔트로피)이 포함된다
+- **TailwindCSS v4** (설정파일 없는 새로운 CSS 엔진) - 유틸리티 CSS
+- **shadcn/ui** (new-york 스타일) - Badge, Card, Skeleton, Separator, ScrollArea 등
+- **Lucide React** - 아이콘 (검색, 달력, 시계, 태그 등)
+- **next-themes** - 다크모드 지원 (F008)
 
-### F005 - 견적서 목록 조회
-- [ ] 노션 DB의 모든 페이지를 최신 수정일 기준 내림차순으로 표시한다
-- [ ] 견적서 제목, 클라이언트명, 발행일, 공유 링크 생성 여부가 목록에 표시된다
+### Notion 연동
 
-### F010 - 관리자 인증
-- [ ] 올바른 이메일/비밀번호로 로그인 후 대시보드로 이동한다
-- [ ] 잘못된 자격증명으로 로그인 시 명확한 오류 메시지를 표시한다
-- [ ] 로그인 세션은 브라우저를 닫아도 유지된다 (Supabase 기본 세션 정책)
-- [ ] 비로그인 상태로 관리자 페이지 접근 시 로그인 페이지로 리디렉션된다
+- **@notionhq/client** - 공식 Notion JavaScript SDK
+  - `notion.databases.query()` - 포스트 목록 조회 (F001)
+  - `notion.blocks.children.list()` - 포스트 본문 블록 조회 (F002)
+  - `notion.pages.retrieve()` - 포스트 메타데이터 조회 (F004)
+- **notion-to-md** (선택적) - Notion 블록을 Markdown으로 변환 보조
 
-### F011 - 토큰 기반 접근 제어
-- [ ] 유효한 토큰으로 접근 시 견적서 내용이 표시된다
-- [ ] 존재하지 않는 토큰으로 접근 시 접근 불가 페이지로 이동한다
-- [ ] 만료된 토큰으로 접근 시 만료 안내 메시지가 포함된 접근 불가 페이지로 이동한다
-- [ ] 토큰 검증은 서버 사이드에서 수행되며, 클라이언트에 노션 API 키가 노출되지 않는다
+### 코드 하이라이팅
+
+- **shiki** - 서버 사이드 신택스 하이라이터 (Next.js Server Components와 최적 호환)
+
+### 캐시 & 성능
+
+- **Next.js ISR** - `revalidate: 3600` (1시간) 기본 설정 (F009)
+- **next/image** - 이미지 최적화 (Notion 이미지 URL 도메인 허용 설정 필요)
+- **unstable_cache** - 함수 레벨 캐싱 (Notion API 응답 캐시)
+
+### SEO
+
+- **Next.js Metadata API** - `generateMetadata()` 함수로 동적 메타태그 생성 (F006)
+- **Next.js sitemap.ts** - MetadataRoute.Sitemap 타입 활용 (F007)
+- **Next.js robots.ts** - MetadataRoute.Robots 타입 활용 (F011)
+
+### 개발 도구
+
+- **ESLint** + **Prettier** + **Husky** - 코드 품질 관리
+- **npm** - 패키지 관리
+
+---
+
+## 환경변수 설정
+
+```bash
+# .env.local
+NOTION_API_KEY=secret_xxxxxxxxxxxxxxxxxxxx
+NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 선택적
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+NEXT_PUBLIC_SITE_NAME=내 블로그
+NEXT_PUBLIC_SITE_DESCRIPTION=개인 기술 블로그
+```
+
+---
+
+## Notion API 핵심 구현 패턴
+
+### 포스트 목록 조회 (F001)
+
+```typescript
+// src/lib/notion/posts.ts
+import { Client } from '@notionhq/client'
+import { unstable_cache } from 'next/cache'
+
+const notion = new Client({ auth: process.env.NOTION_API_KEY })
+
+export const getPosts = unstable_cache(
+  async (tag?: string) => {
+    // [수정] 태그 필터 적용 시에도 Status: Published 조건을 항상 포함 (and 복합 필터)
+    const filter = {
+      and: [
+        { property: 'Status', select: { equals: 'Published' } },
+        ...(tag ? [{ property: 'Tags', multi_select: { contains: tag } }] : []),
+      ],
+    }
+
+    const response = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID!,
+      filter,
+      sorts: [{ property: 'PublishedAt', direction: 'descending' }],
+    })
+
+    return response.results.map(mapPageToPost)
+  },
+  ['posts'],
+  { revalidate: 3600, tags: ['posts'] }
+)
+```
+
+### 포스트 블록 조회 (F002)
+
+```typescript
+// src/lib/notion/blocks.ts
+export const getPostBlocks = unstable_cache(
+  async (pageId: string) => {
+    const blocks = []
+    let cursor: string | undefined
+
+    do {
+      const response = await notion.blocks.children.list({
+        block_id: pageId,
+        start_cursor: cursor,
+        page_size: 100,
+      })
+      blocks.push(...response.results)
+      cursor = response.next_cursor ?? undefined
+    } while (cursor)
+
+    return blocks
+  },
+  ['blocks'],
+  { revalidate: 3600, tags: ['blocks'] }
+)
+```
+
+### ISR 설정 (F009) - 포스트 상세 페이지
+
+```typescript
+// src/app/posts/[slug]/page.tsx
+import { notFound } from 'next/navigation'
+
+export const revalidate = 3600 // 1시간 ISR
+
+export async function generateStaticParams() {
+  const posts = await getPosts()
+  return posts.map((post) => ({ slug: post.slug }))
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const post = await getPostBySlug(slug)
+  if (!post) return {}
+
+  return {
+    title: post.title,
+    description: post.summary,
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      images: post.coverImageUrl ? [post.coverImageUrl] : [],
+    },
+  }
+}
+```
+
+### Notion 이미지 URL 만료 대응 전략 (Critical)
+
+> Notion의 파일/이미지 URL은 AWS S3 Signed URL로 **1시간 후 만료**됩니다. ISR 캐시와 구조적으로 충돌하므로 아래 전략을 적용합니다.
+
+**선택 전략: API Route 프록시 (MVP 기본 전략)**
+
+- 커버 이미지: Notion `Files & Media` 속성에 **외부 CDN URL**(직접 업로드)을 저장하여 영구 URL 보장
+- 본문 내부 이미지: Next.js API Route를 프록시로 사용하여 Notion 블록 ID 기반으로 실시간 조회 후 반환
+
+```typescript
+// src/app/api/notion-image/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  const blockId = request.nextUrl.searchParams.get('blockId')
+  if (!blockId) return NextResponse.json({ error: 'blockId required' }, { status: 400 })
+
+  // Notion blocks API로 최신 이미지 URL을 실시간 조회하여 리다이렉트
+  const block = await notion.blocks.retrieve({ block_id: blockId })
+  const imageUrl =
+    block.type === 'image'
+      ? block.image.type === 'external'
+        ? block.image.external.url
+        : block.image.file.url // S3 Signed URL - 프록시로 반환
+      : null
+
+  if (!imageUrl) return NextResponse.json({ error: 'Image not found' }, { status: 404 })
+
+  const imageResponse = await fetch(imageUrl)
+  return new NextResponse(imageResponse.body, {
+    headers: {
+      'Content-Type': imageResponse.headers.get('Content-Type') ?? 'image/png',
+      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+    },
+  })
+}
+```
+
+```typescript
+// src/components/notion/notion-image.tsx - 본문 이미지 렌더링
+// block.type === 'image' 인 경우 /api/notion-image?blockId={block.id} 로 src 지정
+<Image src={`/api/notion-image?blockId=${block.id}`} alt={caption} ... />
+```
+
+> **커버 이미지 운영 방침**: Notion DB의 `Cover` 속성에는 Notion 내부 업로드 대신 외부 이미지 URL(Cloudinary, S3 등)을 직접 입력하세요.
+
+---
+
+### next.config.ts 설정
+
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'www.notion.so',
+      },
+      {
+        protocol: 'https',
+        hostname: 'prod-files-secure.s3.us-west-2.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+      },
+    ],
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@notionhq/client'],
+  },
+}
+
+export default nextConfig
+```
+
+---
+
+## shadcn/ui 컴포넌트 설치 목록
+
+```bash
+npx shadcn@latest add badge        # 태그 배지
+npx shadcn@latest add card         # 포스트 카드
+npx shadcn@latest add skeleton     # 로딩 스켈레톤
+npx shadcn@latest add separator    # 구분선
+npx shadcn@latest add scroll-area  # 목차 스크롤
+npx shadcn@latest add input        # 검색 입력
+npx shadcn@latest add button       # 버튼
+```
+
+---
+
+## 신규 패키지 설치
+
+```bash
+# Notion 공식 SDK
+npm install @notionhq/client
+
+# 서버 사이드 신택스 하이라이터
+npm install shiki
+```
+
+---
+
+## 정합성 검증 체크리스트
+
+### 1단계: 기능 명세 → 페이지 연결 검증
+
+- [x] F001 → 블로그 홈 페이지, 태그 필터 페이지에서 구현
+- [x] F002 → 블로그 포스트 상세 페이지에서 구현
+- [x] F003 → 블로그 홈 페이지, 태그 필터 페이지에서 구현
+- [x] F004 → 블로그 포스트 상세 페이지에서 구현
+- [x] F005 → 블로그 포스트 상세 페이지에서 구현
+- [x] F006 → 블로그 홈 페이지, 블로그 포스트 상세 페이지, 태그 필터 페이지에서 구현
+- [x] F007 → sitemap 페이지에서 구현
+- [x] F008 → 전체 페이지 공통 헤더에서 구현
+- [x] F009 → 블로그 홈, 포스트 상세, 태그 필터 페이지에서 구현
+- [x] F010 → 블로그 홈 페이지에서 구현
+- [x] F011 → robots 페이지에서 구현
+- [x] F012 → 블로그 홈 페이지, 블로그 포스트 상세 페이지에서 구현
+- [x] F013 → 전체 페이지 공통 레이아웃에서 구현
+
+### 2단계: 메뉴 구조 → 페이지 연결 검증
+
+- [x] 블로그 홈 페이지 → 페이지별 상세 기능에 존재
+- [x] 태그 필터 페이지 → 페이지별 상세 기능에 존재
+- [x] 블로그 포스트 상세 페이지 → 페이지별 상세 기능에 존재
+- [x] sitemap.xml → 페이지별 상세 기능에 존재
+
+### 3단계: 누락 항목 검증
+
+- [x] 기능 명세에만 있고 구현 페이지 없는 기능: 없음
+- [x] 페이지에만 있고 기능 명세 미정의 기능: 없음
+- [x] 메뉴에만 있고 실제 페이지 없는 항목: 없음
