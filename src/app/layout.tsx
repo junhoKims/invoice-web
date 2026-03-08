@@ -1,12 +1,17 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist_Mono, Noto_Sans_KR } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+// 한글 폰트 최적화: Noto Sans KR (Google Fonts)
+const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-noto-sans-kr',
+  preload: true,
+  fallback: ['system-ui', 'sans-serif'],
+  weight: ['400', '500', '700'],
 })
 
 const geistMono = Geist_Mono({
@@ -15,9 +20,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'NextJS Starter - 모던 웹 스타터킷',
+  title: '견적서 조회 시스템',
   description:
-    'Next.js 15, TypeScript, TailwindCSS, ShadcnUI로 구축된 프로덕션 준비가 완료된 웹 애플리케이션 스타터킷',
+    '노션 기반 견적서 관리 시스템 - 웹에서 견적서를 확인하고 PDF로 다운로드하세요',
 }
 
 export default function RootLayout({
@@ -26,10 +31,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="ko" suppressHydrationWarning className={notoSansKR.variable}>
+      <body className={`${geistMono.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

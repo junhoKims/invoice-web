@@ -1,17 +1,13 @@
-import { Container } from './container'
-
 export function Footer() {
   return (
     <footer className="border-t">
-      <Container>
-        <div className="py-8">
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm">
-              © 2024 NextJS Starter. 모든 권리 보유.
-            </p>
-          </div>
+      <div className="container mx-auto px-4 py-6">
+        <div className="text-center">
+          <p className="text-muted-foreground text-sm">
+            © {new Date().getFullYear()} 견적서 시스템. All rights reserved.
+          </p>
         </div>
-      </Container>
+      </div>
     </footer>
   )
 }
