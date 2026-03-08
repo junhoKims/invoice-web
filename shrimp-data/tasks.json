@@ -1,1 +1,454 @@
-{ "tasks": [] }
+{
+  "tasks": [
+    {
+      "id": "0fc549e9-faa4-44ae-90f0-4d3eb703e6c3",
+      "name": "[Phase 1] 프로젝트 기반 확인 및 블로그 라우트 설계",
+      "description": "기존 프로젝트 설정을 검토하고, 블로그 시스템에 필요한 라우트 구조와 환경변수를 추가한다. /blog, /blog/[slug], /about 라우트를 설계하고, NOTION_BLOG_DATABASE_ID 환경변수를 env.ts와 .env.example에 추가한다.",
+      "notes": "기존 env.ts의 zod 스키마 패턴을 그대로 따를 것. .optional()로 처리하거나 필수값으로 처리할지는 기존 패턴 확인 후 결정.",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2026-03-08T08:09:35.528Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/lib/env.ts",
+          "type": "TO_MODIFY",
+          "description": "NOTION_BLOG_DATABASE_ID 환경변수 추가"
+        },
+        {
+          "path": ".env.example",
+          "type": "TO_MODIFY",
+          "description": "블로그 DB ID 환경변수 예시 추가"
+        },
+        {
+          "path": "src/app/blog/page.tsx",
+          "type": "CREATE",
+          "description": "블로그 목록 페이지 placeholder"
+        },
+        {
+          "path": "src/app/blog/[slug]/page.tsx",
+          "type": "CREATE",
+          "description": "블로그 상세 페이지 placeholder"
+        },
+        {
+          "path": "src/app/about/page.tsx",
+          "type": "CREATE",
+          "description": "소개 페이지 placeholder"
+        }
+      ],
+      "implementationGuide": "1. src/lib/env.ts 읽기 -> NOTION_BLOG_DATABASE_ID 필드를 zod 스키마에 추가\n2. .env.example에 NOTION_BLOG_DATABASE_ID=your_blog_database_id 추가\n3. src/app/blog/ 디렉토리 생성 (page.tsx placeholder)\n4. src/app/blog/[slug]/ 디렉토리 생성 (page.tsx placeholder)\n5. src/app/about/page.tsx 생성 (placeholder)\n6. npm run check-all 실행하여 타입 오류 없음 확인",
+      "verificationCriteria": "npm run check-all 통과, npm run dev 정상 실행, /blog 및 /blog/test 라우트 접근 가능",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "3bd721c7-d49b-4541-9b65-56d0a173d902",
+      "name": "[Phase 1] 블로그 타입 시스템 설계",
+      "description": "블로그 포스트, 카테고리, 태그에 대한 TypeScript 타입을 정의한다. 기존 types/ 패턴을 따라 blog.ts와 taxonomy.ts를 생성한다.",
+      "notes": "기존 src/types/invoice.ts, src/types/notion.ts 패턴 참고. any 타입 절대 금지.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "0fc549e9-faa4-44ae-90f0-4d3eb703e6c3"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/types/blog.ts",
+          "type": "CREATE",
+          "description": "BlogPost, BlogPostSummary, BlogListResponse 타입"
+        },
+        {
+          "path": "src/types/taxonomy.ts",
+          "type": "CREATE",
+          "description": "Category, Tag 타입"
+        },
+        {
+          "path": "src/types/notion.ts",
+          "type": "TO_MODIFY",
+          "description": "NotionBlock 타입 추가"
+        },
+        {
+          "path": "src/types/invoice.ts",
+          "type": "REFERENCE",
+          "description": "기존 타입 정의 패턴 참고"
+        }
+      ],
+      "implementationGuide": "1. src/types/blog.ts 생성:\n   - BlogPostStatus: 'published' | 'draft' | 'archived'\n   - BlogPost: id, slug, title, excerpt, content(NotionBlock[]), coverImage, category, tags, publishedAt, updatedAt, readingTime, status\n   - BlogPostSummary: BlogPost에서 content 제외한 목록용 타입\n   - BlogListResponse: posts(BlogPostSummary[]), total, hasMore\n2. src/types/taxonomy.ts 생성:\n   - Category: id, name, slug, description?, postCount\n   - Tag: id, name, slug, postCount\n3. src/types/notion.ts 수정: NotionBlock 타입 추가 (type, content, children 등)",
+      "verificationCriteria": "npm run typecheck 통과, any 타입 없음, 모든 타입에 명시적 export",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "42d178ab-93dc-4298-bd7f-bffc44561c49",
+      "name": "[Phase 2] Notion API 클라이언트 블로그 기능 확장",
+      "description": "기존 src/lib/notion.ts에 블로그용 API 메서드를 추가하고, notion-parser.ts에 블록 파싱 로직을 추가하며, blog.service.ts를 신규 생성한다.",
+      "notes": "Notion API 호출은 반드시 lib/notion.ts에서만. blog.service.ts에서 직접 notion 클라이언트 import 금지. 모든 API 호출에 try-catch 필수.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "3bd721c7-d49b-4541-9b65-56d0a173d902"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/lib/notion.ts",
+          "type": "TO_MODIFY",
+          "description": "블로그용 queryBlogDatabase, getBlogPage, getBlogBlocks 추가"
+        },
+        {
+          "path": "src/lib/utils/notion-parser.ts",
+          "type": "TO_MODIFY",
+          "description": "parseBlogPost, parseBlogPostSummary, parseNotionBlocks 추가"
+        },
+        {
+          "path": "src/lib/services/blog.service.ts",
+          "type": "CREATE",
+          "description": "블로그 비즈니스 로직 서비스"
+        },
+        {
+          "path": "src/lib/cache.ts",
+          "type": "REFERENCE",
+          "description": "캐싱 패턴 참고"
+        },
+        {
+          "path": "src/lib/services/invoice.service.ts",
+          "type": "REFERENCE",
+          "description": "서비스 레이어 패턴 참고"
+        }
+      ],
+      "implementationGuide": "1. src/lib/notion.ts 읽기 -> 기존 패턴 파악 후 아래 함수 추가:\n   - queryBlogDatabase(filter?, pageSize?, cursor?): Promise<QueryDatabaseResponse>\n   - getBlogPage(pageId: string): Promise<PageObjectResponse>\n   - getBlogBlocks(blockId: string): Promise<ListBlockChildrenResponse>\n2. src/lib/utils/notion-parser.ts에 추가:\n   - parseBlogPost(page): BlogPost\n   - parseBlogPostSummary(page): BlogPostSummary\n   - parseNotionBlocks(blocks): NotionBlock[]\n3. src/lib/services/blog.service.ts 신규 생성:\n   - getPostList(options): Promise<BlogListResponse> - unstable_cache 적용, 태그 ['blog-posts']\n   - getPostBySlug(slug): Promise<BlogPost | null> - unstable_cache 적용, 태그 ['blog-post', slug]\n   - getCategories(): Promise<Category[]>\n   - getTags(): Promise<Tag[]>",
+      "verificationCriteria": "npm run typecheck 통과, blog.service.ts에서 getPostList/getPostBySlug 정상 호출 가능, any 타입 없음",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "5aeae429-86ad-427c-8342-aaf7351337b6",
+      "name": "[Phase 2] 공통 레이아웃 및 블로그 공통 컴포넌트",
+      "description": "블로그 헤더/네비게이션 컴포넌트를 신규 생성하고, 루트 layout.tsx에 헤더를 통합한다. 블로그 목록에서 사용할 PostCard, PostCardSkeleton 컴포넌트를 생성한다.",
+      "notes": "컴포넌트 파일명은 PascalCase. cn() 유틸 사용. 시맨틱 색상 변수 사용(bg-background 등). 인라인 style 금지.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "42d178ab-93dc-4298-bd7f-bffc44561c49"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/components/layout/header.tsx",
+          "type": "CREATE",
+          "description": "블로그 헤더/네비게이션"
+        },
+        {
+          "path": "src/app/layout.tsx",
+          "type": "TO_MODIFY",
+          "description": "Header 컴포넌트 추가"
+        },
+        {
+          "path": "src/components/blog/PostCard.tsx",
+          "type": "CREATE",
+          "description": "포스트 목록 카드"
+        },
+        {
+          "path": "src/components/blog/PostCardSkeleton.tsx",
+          "type": "CREATE",
+          "description": "포스트 카드 스켈레톤"
+        },
+        {
+          "path": "src/components/blog/index.ts",
+          "type": "CREATE",
+          "description": "barrel export"
+        },
+        {
+          "path": "src/components/theme-toggle.tsx",
+          "type": "REFERENCE",
+          "description": "다크모드 토글 재사용"
+        },
+        {
+          "path": "src/components/layout/footer.tsx",
+          "type": "REFERENCE",
+          "description": "기존 푸터 패턴 참고"
+        }
+      ],
+      "implementationGuide": "1. src/components/layout/header.tsx 생성:\n   - 블로그 로고/이름, 네비게이션 링크(/blog, /about)\n   - 다크모드 토글(기존 theme-toggle.tsx 재사용)\n   - Server Component로 구현\n2. src/app/layout.tsx 수정: Header 컴포넌트 추가\n3. src/components/blog/PostCard.tsx 생성:\n   - Props: { post: BlogPostSummary, className?: string }\n   - 썸네일, 제목, 날짜, 카테고리, 태그, 요약, 읽기시간 표시\n   - shadcn Card 컴포넌트 활용\n4. src/components/blog/PostCardSkeleton.tsx 생성:\n   - shadcn Skeleton 컴포넌트 활용\n5. src/components/blog/index.ts: barrel export 생성",
+      "verificationCriteria": "npm run check-all 통과, /blog 접근 시 헤더 렌더링, PostCard Props 타입 오류 없음",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "541f447e-5742-48f7-b1c7-2adec47b30d4",
+      "name": "[Phase 3] 블로그 포스트 목록 페이지 구현",
+      "description": "app/blog/page.tsx를 완성하여 Notion DB에서 포스트 목록을 불러와 그리드 레이아웃으로 표시한다. Suspense 경계와 로딩 스켈레톤을 적용한다.",
+      "notes": "searchParams는 반드시 await. Server Component 기본 유지. Pagination만 Client Component.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "5aeae429-86ad-427c-8342-aaf7351337b6"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/app/blog/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "포스트 목록 페이지 완성"
+        },
+        {
+          "path": "src/app/blog/loading.tsx",
+          "type": "CREATE",
+          "description": "목록 로딩 스켈레톤"
+        },
+        {
+          "path": "src/components/blog/Pagination.tsx",
+          "type": "CREATE",
+          "description": "페이지네이션 컴포넌트"
+        }
+      ],
+      "implementationGuide": "1. src/app/blog/page.tsx 완성:\n   - Server Component\n   - searchParams: Promise<{category?, tag?, page?}> 타입으로 await 처리\n   - blog.service.getPostList() 호출\n   - PostCard 그리드 렌더링 (반응형: 1col/sm:2col/lg:3col)\n   - Suspense로 감싸기\n2. src/app/blog/loading.tsx 생성:\n   - PostCardSkeleton 6개 그리드 렌더링\n3. src/components/blog/Pagination.tsx 생성:\n   - Props: { currentPage, totalPages, basePath }\n   - shadcn Button 활용, URL 쿼리 파라미터 기반\n   - 'use client' (URL 조작 필요)",
+      "verificationCriteria": "npm run check-all 통과, /blog 접근 시 포스트 목록 렌더링, 로딩 스켈레톤 동작, 반응형 그리드 확인",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "23a4cbe9-d4db-4bf6-8a5a-d5576dfb0a46",
+      "name": "[Phase 3] 블로그 포스트 상세 페이지 구현",
+      "description": "app/blog/[slug]/page.tsx를 완성하여 단일 포스트를 렌더링한다. Notion 블록 렌더러, 목차(TOC), 이전/다음 포스트 네비게이션, generateMetadata를 구현한다.",
+      "notes": "params 반드시 await. generateMetadata도 동일하게 async params 처리. notFound() 임포트는 next/navigation에서.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "541f447e-5742-48f7-b1c7-2adec47b30d4"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/app/blog/[slug]/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "포스트 상세 페이지 완성"
+        },
+        {
+          "path": "src/app/blog/[slug]/loading.tsx",
+          "type": "CREATE",
+          "description": "상세 로딩 상태"
+        },
+        {
+          "path": "src/components/blog/NotionBlockRenderer.tsx",
+          "type": "CREATE",
+          "description": "Notion 블록 -> JSX 렌더러"
+        },
+        {
+          "path": "src/components/blog/TableOfContents.tsx",
+          "type": "CREATE",
+          "description": "목차 컴포넌트"
+        },
+        {
+          "path": "src/components/blog/PostNavigation.tsx",
+          "type": "CREATE",
+          "description": "이전/다음 포스트 네비게이션"
+        },
+        {
+          "path": "src/app/invoice/[id]/page.tsx",
+          "type": "REFERENCE",
+          "description": "기존 동적 라우트 패턴 참고"
+        }
+      ],
+      "implementationGuide": "1. src/components/blog/NotionBlockRenderer.tsx 생성:\n   - Props: { blocks: NotionBlock[] }\n   - paragraph, heading_1/2/3, bulleted_list_item, numbered_list_item, code, image, quote, divider 블록 처리\n   - Server Component\n2. src/components/blog/TableOfContents.tsx 생성:\n   - Props: { headings: {id, text, level}[] }\n   - 'use client' (스크롤 하이라이트)\n3. src/components/blog/PostNavigation.tsx 생성:\n   - Props: { prev: BlogPostSummary | null, next: BlogPostSummary | null }\n4. src/app/blog/[slug]/page.tsx 완성:\n   - async params: Promise<{slug: string}> -> await\n   - generateMetadata 함수 export (title, description, openGraph)\n   - blog.service.getPostBySlug(slug) -> not found 처리\n   - NotionBlockRenderer, TableOfContents, PostNavigation 조합\n5. src/app/blog/[slug]/loading.tsx 생성",
+      "verificationCriteria": "npm run check-all 통과, /blog/[slug] 접근 시 포스트 렌더링, generateMetadata 동작, notFound 처리 확인",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "43e86c8c-9074-4ab1-9000-83db41aaabc9",
+      "name": "[Phase 3] 에러 및 404 상태 처리",
+      "description": "블로그 라우트의 에러 바운더리, 404 페이지, not-found 처리를 구현한다.",
+      "notes": "error.tsx는 반드시 'use client'. 기존 src/app/invoice/[id]/error.tsx, not-found.tsx 패턴 참고.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "23a4cbe9-d4db-4bf6-8a5a-d5576dfb0a46"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/app/blog/[slug]/error.tsx",
+          "type": "CREATE",
+          "description": "포스트 에러 바운더리"
+        },
+        {
+          "path": "src/app/blog/[slug]/not-found.tsx",
+          "type": "CREATE",
+          "description": "포스트 404 페이지"
+        },
+        {
+          "path": "src/app/blog/error.tsx",
+          "type": "CREATE",
+          "description": "목록 에러 바운더리"
+        },
+        {
+          "path": "src/app/invoice/[id]/error.tsx",
+          "type": "REFERENCE",
+          "description": "기존 에러 패턴 참고"
+        },
+        {
+          "path": "src/app/invoice/[id]/not-found.tsx",
+          "type": "REFERENCE",
+          "description": "기존 404 패턴 참고"
+        }
+      ],
+      "implementationGuide": "1. src/app/blog/[slug]/error.tsx 생성:\n   - 'use client' (에러 바운더리 필수)\n   - Props: { error: Error, reset: () => void }\n   - 에러 메시지 표시 + 재시도 버튼\n2. src/app/blog/[slug]/not-found.tsx 생성:\n   - 포스트를 찾을 수 없음 메시지\n   - /blog로 돌아가기 링크\n3. src/app/blog/error.tsx 생성:\n   - 목록 페이지 에러 처리",
+      "verificationCriteria": "존재하지 않는 slug 접근 시 not-found 표시, 에러 발생 시 error.tsx 렌더링, npm run check-all 통과",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "b97d3e4f-9489-4841-82e7-c74c66c1500f",
+      "name": "[Phase 4] 카테고리/태그 필터 및 검색 기능",
+      "description": "블로그 목록 페이지에 카테고리/태그 필터 UI를 추가하고, URL 쿼리 파라미터 기반으로 필터링한다.",
+      "notes": "CategoryFilter는 'use client'지만 page.tsx는 Server Component 유지. searchParams는 반드시 await.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "43e86c8c-9074-4ab1-9000-83db41aaabc9"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/components/blog/CategoryFilter.tsx",
+          "type": "CREATE",
+          "description": "카테고리/태그 필터 UI"
+        },
+        {
+          "path": "src/app/blog/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "필터 적용"
+        },
+        {
+          "path": "src/lib/services/blog.service.ts",
+          "type": "TO_MODIFY",
+          "description": "필터 옵션 추가"
+        }
+      ],
+      "implementationGuide": "1. src/components/blog/CategoryFilter.tsx 생성:\n   - 'use client' (URL 파라미터 조작)\n   - Props: { categories: Category[], tags: Tag[], currentCategory?, currentTag? }\n   - useRouter, useSearchParams 활용\n   - shadcn Badge/Button으로 필터 버튼 렌더링\n2. src/app/blog/page.tsx 수정:\n   - searchParams에서 category, tag 읽기\n   - blog.service.getPostList({ category, tag }) 전달\n   - CategoryFilter 컴포넌트 추가\n3. src/lib/services/blog.service.ts 수정:\n   - getPostList에 category, tag 필터 옵션 추가\n   - Notion API filter 쿼리 적용",
+      "verificationCriteria": "카테고리 클릭 시 URL 파라미터 변경, 필터된 포스트 목록 표시, npm run check-all 통과",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "ed0dc3e0-6040-4d38-a3c3-a42895a037d6",
+      "name": "[Phase 4] SEO 메타데이터, 사이트맵, RSS",
+      "description": "동적 OG Image, sitemap.xml, RSS 피드를 구현하여 SEO를 강화한다.",
+      "notes": "next/og는 Edge Runtime에서 동작. sitemap.ts는 Next.js 내장 Metadata API 사용.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "b97d3e4f-9489-4841-82e7-c74c66c1500f"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/app/og/route.tsx",
+          "type": "CREATE",
+          "description": "동적 OG Image 생성"
+        },
+        {
+          "path": "src/app/sitemap.ts",
+          "type": "CREATE",
+          "description": "사이트맵 자동 생성"
+        },
+        {
+          "path": "src/app/rss.xml/route.ts",
+          "type": "CREATE",
+          "description": "RSS 피드"
+        },
+        {
+          "path": "src/app/layout.tsx",
+          "type": "TO_MODIFY",
+          "description": "metadataBase, openGraph 설정"
+        }
+      ],
+      "implementationGuide": "1. src/app/og/route.tsx 생성:\n   - GET handler, searchParams에서 title, description 읽기\n   - next/og의 ImageResponse 사용\n   - 블로그 스타일의 OG 이미지 생성\n2. src/app/sitemap.ts 생성:\n   - MetadataRoute.Sitemap 반환\n   - blog.service.getPostList()로 모든 포스트 URL 생성\n   - /blog, /about 정적 URL 포함\n3. src/app/rss.xml/route.ts 생성:\n   - GET handler\n   - blog.service.getPostList()로 RSS XML 생성\n   - Content-Type: application/xml 헤더\n4. src/app/layout.tsx 수정:\n   - metadataBase 추가\n   - 기본 openGraph 설정",
+      "verificationCriteria": "/sitemap.xml 접근 시 XML 반환, /rss.xml 접근 시 RSS XML 반환, OG Image 생성 확인",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "2de4cfb8-9b04-4bda-8893-788d18bfc138",
+      "name": "[Phase 5] 성능 최적화 - 캐싱, Suspense, 이미지",
+      "description": "Next.js 캐싱 전략을 정교화하고, React Suspense 경계를 최적화하며, 이미지 최적화를 적용한다.",
+      "notes": "next.config.ts 수정 시 기존 설정(보안 헤더, compress 등) 유지. unstable_cache는 Next.js 15에서 안정화됨.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "ed0dc3e0-6040-4d38-a3c3-a42895a037d6"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "src/lib/services/blog.service.ts",
+          "type": "TO_MODIFY",
+          "description": "캐시 태그 및 revalidate 최적화"
+        },
+        {
+          "path": "src/app/blog/page.tsx",
+          "type": "TO_MODIFY",
+          "description": "Suspense 경계 세분화"
+        },
+        {
+          "path": "next.config.ts",
+          "type": "TO_MODIFY",
+          "description": "Notion 이미지 도메인 허용"
+        },
+        {
+          "path": "src/lib/rate-limit.ts",
+          "type": "REFERENCE",
+          "description": "Rate limit 재사용"
+        }
+      ],
+      "implementationGuide": "1. src/lib/services/blog.service.ts 검토:\n   - getPostList: revalidate 60초, tags: ['blog-posts']\n   - getPostBySlug: revalidate 300초, tags: ['blog-post', slug]\n   - getCategories/getTags: revalidate 3600초\n2. src/app/blog/page.tsx: Suspense 경계 세분화\n   - CategoryFilter를 Suspense로 감싸기\n   - PostCard 목록을 별도 async 컴포넌트로 분리\n3. next.config.ts 확인:\n   - images.remotePatterns에 Notion 이미지 도메인 추가\n   - (notion.so, s3.us-west-2.amazonaws.com 등)\n4. NotionBlockRenderer의 이미지 블록: next/image 사용\n5. lib/rate-limit.ts 재사용하여 API 과호출 방지",
+      "verificationCriteria": "npm run build 성공, Notion 이미지 next/image로 렌더링, 캐시 태그 설정 확인",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    },
+    {
+      "id": "53f2e2fd-8f2b-4b27-87e5-49c3947b78ab",
+      "name": "[Phase 5] 최종 배포 검증",
+      "description": "vercel.json 설정을 검토하고, 모든 검사를 통과한 후 배포 준비를 완료한다.",
+      "notes": "배포 전 반드시 npm run build 성공 확인. 환경변수 누락 시 런타임 오류 발생하므로 .env.example 완전성 확인 필수.",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "2de4cfb8-9b04-4bda-8893-788d18bfc138"
+        }
+      ],
+      "createdAt": "2026-03-08T08:09:35.529Z",
+      "updatedAt": "2026-03-08T08:09:35.529Z",
+      "relatedFiles": [
+        {
+          "path": "vercel.json",
+          "type": "REFERENCE",
+          "description": "배포 설정 검토"
+        },
+        {
+          "path": ".env.example",
+          "type": "TO_MODIFY",
+          "description": "최종 환경변수 문서화"
+        },
+        {
+          "path": "docs/ROADMAP.md",
+          "type": "REFERENCE",
+          "description": "MVP 성공 기준 체크리스트"
+        }
+      ],
+      "implementationGuide": "1. npm run check-all 실행: typecheck + lint + format:check 모두 통과\n2. npm run build 실행: 빌드 오류 없음 확인\n3. vercel.json 검토: 기존 설정 확인, 필요시 블로그 라우트 관련 설정 추가\n4. .env.example 최종 검토: 모든 필요 환경변수 문서화 확인\n5. ROADMAP.md MVP 성공 기준 체크리스트 최종 검증:\n   - /blog 포스트 목록 정상 동작\n   - /blog/[slug] 포스트 상세 정상 동작\n   - 카테고리/태그 필터 동작\n   - SEO 메타데이터 생성\n   - 모바일/태블릿/데스크톱 반응형 확인",
+      "verificationCriteria": "npm run check-all 통과, npm run build 성공, 모든 블로그 라우트 정상 동작, 반응형 레이아웃 확인",
+      "analysisResult": "ROADMAP.md Phase 1~5 순서를 따른 Notion CMS Blog 개발. 기존 invoice-web 프로젝트(Next.js 15.5.3, TypeScript strict, TailwindCSS v4, shadcn/ui, @notionhq/client 설치됨) 위에 블로그 시스템을 구축한다. 환경변수는 lib/env.ts, Notion API는 lib/notion.ts 단일 진입점, 컴포넌트는 PascalCase, params는 반드시 await, npm run check-all 통과가 각 Phase 완료 기준이다."
+    }
+  ]
+}
