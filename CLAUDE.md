@@ -17,6 +17,7 @@
 ## 📚 개발 가이드
 
 - **📋 프로젝트 요구사항 (PRD)**: `@/docs/PRD.md` - 견적서 시스템 상세 명세
+- **🗺️ 개발 로드맵**: `@/docs/ROADMAP.md` - 단계별 개발 계획 및 진행 현황
 - **📁 프로젝트 구조**: `@/docs/guides/project-structure.md`
 - **🎨 스타일링 가이드**: `@/docs/guides/styling-guide.md`
 - **🧩 컴포넌트 패턴**: `@/docs/guides/component-patterns.md`

@@ -21,11 +21,11 @@
     "shrimp-task-manager": {
       "command": "node",
       "args": [
-        "/Users/junhokim/develops/testman/mcp-shrimp-task-manager/dist/index.js"
+        "/Users/junhokim/develops/mcp-shrimp-task-manager/dist/index.js"
       ],
       "env": {
         "DATA_DIR": "/Users/junhokim/develops/invoice-web/shrimp-data",
-        "TEMPLATES_USE": "en",
+        "TEMPLATES_USE": "ko",
         "ENABLE_GUI": "true"
       }
     }
